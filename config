@@ -1,0 +1,12 @@
+[connectionParam]
+HOST = margot.di.unipi.it
+PORT = 8421
+DELAY = 0.3
+
+[chatParam]
+HOST = margot.di.unipi.it
+PORT = 8422
+
+[envParam]
+MAXWEIGHT = 32
+
