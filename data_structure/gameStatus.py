@@ -25,6 +25,9 @@ class Player:
         self.predictedActions = []
 
         # is this player a runner, a sniper or what? TBD
+        # 1 runner,
+        # 2 sniper,
+        # 3 boh
         self.classificatedAs = None
 
 class Game:
@@ -38,6 +41,7 @@ class Game:
 
         self.allies = dict()
         self.enemies = dict()
+
         self.activeEnemies = None
         self.activeAllies = None
 
@@ -63,11 +67,14 @@ class Game:
         self.weightedMap = None
 
         # Nearest recharge (manhattan distance, coordinates)
-        self.nearestRecharge = [None, None, None]
+        self.nearestRecharge = [11, None, None]
 
         # number of actions (manhattan distance) that can be done safely and the coordinates to the nearest enemy fireline
         # if manhattan distance == 11 there is no enemy fire line
-        self.nearestEnemyLinearDistance = [None, None, None]
+        self.nearestEnemyLinearDistance = [11, None, None]
+
+        # come sopra ma per gli alleati (utile per impostore)
+        self.nearestAlliesLinearDistance = [11, None, None]
 
         self.runners = 0
 
