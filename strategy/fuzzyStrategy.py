@@ -16,7 +16,7 @@ def fuzzyValues(maxWeight):
     stage = gameStatus.game.stage
 
     '''Useful values for impostor strategy'''
-    alive_allies = gameStatus.game.activeAllies / len(gameStatus.game.allies) # alive / total
+    alive_allies = gameStatus.game.activeAllies / len(gameStatus.game.allies) # alive/total ratio
     close_to_ally = gameStatus.game.nearestAllyLinearDistance[0]  # quanto sono vicino alla linea di fuoco dell'alleato
 
     '''Computing safe zone'''
@@ -70,6 +70,7 @@ def fuzzyValues(maxWeight):
         else:
             d_SafeZone[0] = 3
 
+    '''Values to return'''
     return d_flag, nearestRecharge, myenergy, d_SafeZone, close_to_enemy, alive_allies, stage, close_to_ally
 
 
@@ -80,62 +81,90 @@ def FuzzyControlSystem(maxWeight):
     d_safeZone = ctrl.Antecedent(np.arange(0, 3, 1), 'd_safeZone')
     myenergy = ctrl.Antecedent(np.arange(0, 256, 1), 'myenergy')
     nearestRecharge = ctrl.Antecedent(np.arange(0, 11, 1), 'nearestRecharge')
-    stage = ctrl.Antecedent(np.arange(0, 2, 1), 'nearestRecharge')
-    #alive_allies = ctrl.Antecedent(np.arange(0, len(gameStatus.game.allies), 1), 'alive_allies')
+    stage = ctrl.Antecedent(np.arange(0, 2, 1), 'stage')
 
-    output = ctrl.Consequent(np.arange(0, 30, 1), 'output')
 
-    # goToKill, goToFlag, goToRecharge, staySafe
+    output = ctrl.Consequent(np.arange(0, 40, 1), 'output')
+
 
     output['goToKill'] = fuzz.trimf(output.universe, [0, 10, 10])
     output['goToFlag'] = fuzz.trimf(output.universe, [10, 20, 20])
     output['goToRecharge'] = fuzz.trimf(output.universe, [20, 30, 30])
-    output['staySafe'] = fuzz.trimf(output.universe, [20, 30, 30])
+    output['staySafe'] = fuzz.trimf(output.universe, [30, 40, 40])
 
-    # Auto-membership function population is possible with .automf(3, 5, or 7)
 
     d_flag.automf(3)
     close_to_enemy.automf(3)
-    d_safeZone.automf(3)
-    myenergy.automf(3)
+    d_safeZone.automf(3) # 0=poor=safe , 2=good=notsafe
+    myenergy.automf(5)
     nearestRecharge.automf(3)
-    stage.automf(3)
-    #alive_allies.automf(3)
+    stage.automf(3) # 0=poor, 1=avg, 2=good
+
 
     # poor mediocre average decent good
 
+    '''
+    - I can kill only if the game stage is 1 or 2
+    - My energy is not poor 
+    - I'm too far from the flag & from a safe place OR I'm too far from a safe place OR 
+    '''
+
     kill = ctrl.Rule(
-                    (stage['average'] | stage['good']) &       # I can kill only if the game stage is 1 or 2
-                    (myenergy['average'] | myenergy['good']) |
-                    (d_flag['good'] & d_safeZone['good'])
-                    , output['goToKill'])
+                        (
+                            (stage['average'] | stage['good']) &
+                            (myenergy['mediocre'] | myenergy['average'] | myenergy['decent'] | myenergy['good']) &
+                            (d_flag['good'] & d_safeZone['good'])
+                        ) |
+                        (
+                            (stage['average'] | stage['good']) &
+                            (myenergy['mediocre'] | myenergy['average'] | myenergy['decent'] | myenergy['good']) &
+                            (d_safeZone['good'])
+                        ) |
+                        (
+                            (stage['average'] | stage['good']) &
+                            (myenergy['mediocre'] | myenergy['average'] | myenergy['decent'] | myenergy['good']) &
+                            (close_to_enemy['poor']) # ancora meglio se in & con: enemy=runner
+                        )
+                        , output['goToKill'])
+
+    '''Go to flag if it is near and you're safe
+    OR if it is near, you're safe, you've enough energy and the recharge is far'''
 
     flag = ctrl.Rule(
-                    (d_flag['poor']) &
-                    (myenergy['good'] | myenergy['average']) & (nearestRecharge['average'] | nearestRecharge['good']) &
-                    (d_safeZone['average'] | d_safeZone['good'])
-                     , output['goToFlag'])
+                        (
+                            (d_flag['poor'] | d_flag['average']) &
+                            (d_safeZone['average'] | d_safeZone['good'])
+                        ) |
+                        (
+                            (d_flag['poor'] | d_flag['average']) &
+                            (myenergy['good'] | myenergy['average']) & (nearestRecharge['average'] | nearestRecharge['good']) &
+                            (d_safeZone['average'] | d_safeZone['good'])
+                        )
+                        , output['goToFlag'])
 
-    recharge = ctrl.Rule(
-                        (myenergy['poor'])
-                        & (d_flag['average'] | d_flag['good'])
-                        & (close_to_enemy['good'] | close_to_enemy['average'])
-                        & nearestRecharge['poor']
+    recharge = ctrl.Rule(   # situazione di emergenza
+                            (myenergy['poor'] & nearestRecharge['poor']) | # insieme in AND le due condizioni fondamentali
+
+                        (   # situazione favorevole ma non di emergenza
+                            (myenergy['poor'] & (nearestRecharge['poor'] | nearestRecharge['average'])) &
+                            (d_flag['average'] | d_flag['good']) &
+                            (close_to_enemy['good'] | close_to_enemy['average'])
+                        )
                         , output['goToRecharge'])
 
-    safe = ctrl.Rule((close_to_enemy['average'] | close_to_enemy['good']) &  # ci sono molti nemici
-                     (d_safeZone['poor']) # non sono al sicuro
+
+    '''Se ho un nemico nel mio intorno: 
+    se sono al sicuro provo ad andare ad ucciderlo (goToKill),
+    se non sono al sicuro per prima cosa vado in safe zone'''
+
+    safe = ctrl.Rule((close_to_enemy['poor'] & d_safeZone['poor']) #todo: info duplicata ??
                      , output['goToSafePlace'])
 
     system = ctrl.ControlSystem(rules=[kill, flag, recharge, safe])
 
-    # Later we intend to run this system with a 21*21 set of inputs, so we almediocre
-    # that many plus one unique runs before results are flushed.
-    # Subsequent runs would return in 1/8 the time!
+
     sim = ctrl.ControlSystemSimulation(system)
 
-    # Pass inputs to the ControlSystem using Antecedent labels with Pythonic API
-    # Note: if you like passing many inputs all at once, use .inputs(dict_of_data)
 
     # d_flag, nearestRecharge, myenergy, d_SafeZone, close_to_enemy, alive_allies, stage, close_to_ally
     flag, recharge, energy, safeZone, enemy, allies, stage, ally = fuzzyValues(maxWeight)
@@ -148,8 +177,14 @@ def FuzzyControlSystem(maxWeight):
     sim.input['stage'] = stage
 
 
-    '''Gestione eccezioni'''
+    sim.compute()
+    outputValue = sim.output.get("output")
 
+    output.view(sim=sim)  # plot
+
+
+    '''Gestione eccezioni RIMOSSA'''
+    '''
     try:
         sim.compute()
         outputValue = sim.output.get("output")
@@ -161,7 +196,7 @@ def FuzzyControlSystem(maxWeight):
         print("EXCEPTION FUZZY")
 
         outputValue = 35
-
+    '''
 
     '''Outcomes'''
 
@@ -199,9 +234,9 @@ def FuzzyControlSystem(maxWeight):
         x = gameStatus.game.wantedFlagX
         y = gameStatus.game.wantedFlagX
     '''
-    return x, y  # return x, y, nearestEnemyDistance[0] ???
+    return x, y
 
-
+    # return x, y, nearestEnemyDistance[0] ???
 
 
 
@@ -209,29 +244,21 @@ def FuzzyControlSystemImpostor(maxWeight):
 
     """
     staySafe finché num_allies > 50%, nel frattempo vota.
-    Poi goToKill prendendo ogni volta l'alleato più vicino
-        --> lo fa una funzione a parte, controllando la distanza euclidea dalla linea di tiro in un intorno di 20 caselle.
+    Poi goToKill prendendo ogni volta l'alleato più vicino.
     """
 
     close_to_ally = ctrl.Antecedent(np.arange(0, 11, 1), 'close_to_ally')
+    close_to_enemy = ctrl.Antecedent(np.arange(0, 11, 1), 'close_to_enemy')
     d_safeZone = ctrl.Antecedent(np.arange(0, 3, 1), 'd_safeZone')
     myenergy = ctrl.Antecedent(np.arange(0, 256, 1), 'myenergy')
     nearestRecharge = ctrl.Antecedent(np.arange(0, 11, 1), 'nearestRecharge')
-    stage = ctrl.Antecedent(np.arange(0, 2, 1), 'nearestRecharge')
-    alive_allies = ctrl.Antecedent(np.arange(0, len(gameStatus.game.allies), 1), 'alive_allies')
+    stage = ctrl.Antecedent(np.arange(0, 2, 1), 'stage')
+    alive_allies = ctrl.Antecedent(np.arange(0, 1, 0.01), 'alive_allies')
+        # se il rapporto è uno, gli allies sono tutti vivi
+        # se è zero, gli allies sono tutti morti
 
     output = ctrl.Consequent(np.arange(0, 30, 1), 'output')
 
-    """
-    1. vado a ricaricarmi se:
-        - ho energia bassa/media
-        - la ricarica è molto vicina
-        - ci sono molti nemici 
-    2. resto in zona sicura se:
-        - sono in vita più di metà degli allies | ho gli enemies vicini 
-    3. vado ad uccidere se
-        - sono vivi metà degli alleati o meno | il gioco è allo stage 2
-    """
 
     # goToKill, goToFlag, goToRecharge, staySafe
 
@@ -239,38 +266,53 @@ def FuzzyControlSystemImpostor(maxWeight):
     output['goToRecharge'] = fuzz.trimf(output.universe, [10, 20, 20])
     output['staySafe'] = fuzz.trimf(output.universe, [20, 30, 30])
 
-    # Auto-membership function population is possible with .automf(3, 5, or 7)
+
 
     close_to_ally.automf(3)
     d_safeZone.automf(3)
-    myenergy.automf(3)
+    myenergy.automf(5)
     nearestRecharge.automf(3)
     stage.automf(3)
     alive_allies.automf(3)
+    close_to_enemy.automf(3)
 
-    # TODO
-    ''' DA AGGIORNARE
-    recharge = ctrl.Rule((stage['poor'] | stage['average']) &
-                           (((energy['poor'] | energy['average']) & d_recharge['poor']) |
-                            (energy['poor'] | d_recharge['poor']) |
-                            ((energy['poor'] | energy['average']) & d_recharge['poor'] & num_enemies['good']))
-                           , output['goToRecharge'])
 
-    safe = ctrl.Rule((allies_dist['average'] | allies_dist['good']) &
-                         (stage['poor'] | stage['average']) &
-                         ((num_allies['average'] | num_allies['good']) |
-                          (num_enemies['average'] | num_enemies['good']))
-                         , output['goToSafePlace'])
+    recharge = ctrl.Rule(
+                            # situazione di emergenza
+                            (myenergy['poor'] & nearestRecharge['poor']) | # insieme in AND le due condizioni fondamentali
 
-    kill = ctrl.Rule((allies_dist['poor'] & (num_allies['poor']) | (stage['good'])), output['goToKill'])
-    '''
+                        (   # situazione favorevole ma non di emergenza
+                            (myenergy['poor'] & (nearestRecharge['poor'] | nearestRecharge['average'])) &
+                            (close_to_enemy['good'] | close_to_enemy['average'])
+                        )
+                        , output['goToRecharge'])
+
+    # TODO: manca da modellare il caso (alive_allies['average'])
+
+    safe = ctrl.Rule(   (alive_allies['good']) |  # ragiono da impostore
+                        (d_safeZone['poor'])  # ragiono da player generico
+                        , output['goToSafePlace'])
+
+    # todo: riempire la kill rule con più casi
+    kill = ctrl.Rule(
+                        (stage['average'] | stage['good']) &
+                        (alive_allies['poor']) &
+                        (
+                                (myenergy['mediocre'] | myenergy['average'] | myenergy['decent'] | myenergy['good']) |
+                                (d_safeZone['good'] | close_to_ally['poor'])
+                        )
+                        , output['goToKill'])
+
+
 
     system = ctrl.ControlSystem(rules=[kill, recharge, safe])
 
     sim = ctrl.ControlSystemSimulation(system)
 
+
     # d_flag, nearestRecharge, myenergy, d_SafeZone, close_to_enemy, alive_allies, stage, close_to_ally
     flag, recharge, energy, safeZone, enemy, allies, stage, ally = fuzzyValues(maxWeight)
+
 
     sim.input['nearestRecharge'] = recharge
     sim.input['myenergy'] = energy
@@ -281,7 +323,13 @@ def FuzzyControlSystemImpostor(maxWeight):
     sim.input['close_to_ally'] = ally
 
 
-    ''' Gestire eccezioni:'''
+    sim.compute()
+    outputValue = sim.output.get("output")
+    output.view(sim=sim) # plot
+
+
+    ''' Gestione eccezioni RIMOSSA'''
+    '''
     try:
         sim.compute()
         outputValue = sim.output.get("output")
@@ -291,7 +339,7 @@ def FuzzyControlSystemImpostor(maxWeight):
         # crisp case, stay safe
         print("EXCEPTION FUZZY")
         outputValue = 15
-
+    '''
 
 
     '''Outcomes'''
@@ -318,4 +366,6 @@ def FuzzyControlSystemImpostor(maxWeight):
         # print(gameStatus.game.me.name + "IMPOSTOR vado in safe zone")
 
 
-    return x, y # return x, y, nearestEnemyDistance ???
+    return x, y
+
+    # return x, y, nearestEnemyDistance ???
