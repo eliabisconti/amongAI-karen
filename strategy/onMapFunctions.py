@@ -1,3 +1,5 @@
+from scipy.spatial import distance
+
 from data_structure import gameStatus
 from data_structure.gameStatus import *
 
@@ -124,3 +126,33 @@ def deterministicMap(maxWeight):
                 weightedMap[i][j] = 1
 
     return weightedMap
+
+
+def whereItMoved(prevX, prevY, newX, newY):
+
+
+    # print(str(prevX) + " " + str(prevY) + " " + str(newX) + " " + str(newY) )
+
+    previousDistance = distance.euclidean([prevX, prevY],
+                                          [gameStatus.game.toBeDefendedFlagX, gameStatus.game.toBeDefendedFlagY])
+    actualDistance = distance.euclidean([newX, newY],
+                                        [gameStatus.game.toBeDefendedFlagX, gameStatus.game.toBeDefendedFlagY])
+
+    numberOfMovement = 0
+    numberOfMovement = distance.cityblock([prevX, prevY], [newX, newY])
+
+    if numberOfMovement == 0:
+        return [2]
+    else:
+        sequence = []
+        for step in range(0, numberOfMovement):
+            if previousDistance > actualDistance:
+
+                # va verso la bandiera
+                sequence.append(1)
+            else:
+
+                # non va verso la bandiera
+                sequence.append(2)
+
+        return sequence

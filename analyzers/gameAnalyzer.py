@@ -92,6 +92,8 @@ class gameAnalyzer(Thread):
 
             gameStatus.game.nearestRecharge = nearestRecharge
             gameStatus.game.nearestEnemyLinearDistance = nearestEnemy
+
+
             """
             if gameStatus.game.me.symbol == "A":
                 print("For " + gameStatus.game.me.symbol + " at " + str(gameStatus.game.me.x) + " " + str(gameStatus.game.me.y))

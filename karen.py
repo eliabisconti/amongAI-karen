@@ -9,7 +9,7 @@ from connection.chatConnection import ConnectToChat, ReceiveThread
 from connection.serverConnection import connectToServer
 from strategy.fuzzyStrategy import *
 from strategy.lowLevelStrategy import lowLevelStrategy, lowLevelStrategyImpostor
-from strategy.deterministicMap import deterministicMap
+from strategy.onMapFunctions import deterministicMap, whereItMoved
 from strategy.movement import *
 
 
@@ -184,9 +184,20 @@ class Karen:
 
                     # Karen is also present in the PLAYER list
                     if row[2] == gameStatus.game.me.symbol:
+
+                        # reset map cell
+                        if gameStatus.game.serverMap is not None:
+                            gameStatus.game.serverMap[gameStatus.game.me.y][gameStatus.game.me.x] = "."
+
                         gameStatus.game.me.x = int(row[8])
                         gameStatus.game.me.y = int(row[10])
                         gameStatus.game.me.state = row[12]
+
+                        # refresh my position on the map
+                        if gameStatus.game.serverMap is not None:
+                            gameStatus.game.serverMap[gameStatus.game.me.y][
+                                gameStatus.game.me.x] = gameStatus.game.me.symbol
+
                     # Not Karen, update information of other players
 
                     else:
@@ -203,15 +214,50 @@ class Karen:
                                 gameStatus.game.enemies[pl.symbol] = pl
 
                         elif gameStatus.game.allies.get(row[2]) is not None:
+
+                            # reset map cell
+                            if gameStatus.game.serverMap is not None:
+                                gameStatus.game.serverMap[gameStatus.game.allies.get(row[2]).y][
+                                    gameStatus.game.allies.get(row[2]).x] = "."
                             gameStatus.game.allies.get(row[2]).x = int(row[8])
                             gameStatus.game.allies.get(row[2]).y = int(row[10])
                             gameStatus.game.allies.get(row[2]).state = row[12]
 
+                            # refresh ally position on the map
+                            if gameStatus.game.serverMap is not None:
+                                gameStatus.game.serverMap[gameStatus.game.allies.get(row[2]).y][
+                                    gameStatus.game.allies.get(row[2]).x] = gameStatus.game.allies.get(row[2]).symbol
 
                         elif gameStatus.game.enemies.get(row[2]) is not None:
+
+                            # reset map cell
+                            if gameStatus.game.serverMap is not None:
+                                gameStatus.game.serverMap[gameStatus.game.enemies.get(row[2]).y][
+                                    gameStatus.game.enemies.get(row[2]).x] = "."
+                                # adding the action sequence made by an enemy.
+                                sequence = whereItMoved(gameStatus.game.enemies.get(row[2]).x, gameStatus.game.enemies.get(row[2]).y, int(row[8]), int(row[10]))
+                                """
+                                print(str(row[2]) + " prima sequenza: " + str(
+                                    gameStatus.game.enemies.get(row[2]).actionList))
+                                print(str(row[2]) + " Sequenza " + str(sequence))
+                                """
+                                gameStatus.game.enemies.get(row[2]).actionList.extend(sequence)
+
                             gameStatus.game.enemies.get(row[2]).x = int(row[8])
                             gameStatus.game.enemies.get(row[2]).y = int(row[10])
                             gameStatus.game.enemies.get(row[2]).state = row[12]
+
+                            # refresh enemy position on the map
+                            if gameStatus.game.serverMap is not None:
+                                gameStatus.game.serverMap[gameStatus.game.enemies.get(row[2]).y][
+                                    gameStatus.game.enemies.get(row[2]).x] = gameStatus.game.enemies.get(row[2]).symbol
+
+            '''
+            if gameStatus.game.serverMap is not None:
+                for row in gameStatus.game.serverMap:
+                    print(row)
+            '''
+
             return True
 
         else:
@@ -245,6 +291,15 @@ class Karen:
                         gameStatus.game.allies.get(splitted[j]).y = i
 
                     elif gameStatus.game.enemies.get(splitted[j]) is not None:
+
+                        # adding the action sequence made by an enemy.
+                        if firstTime is False:
+                            sequence = whereItMoved(gameStatus.game.enemies.get(splitted[j]).x, gameStatus.game.enemies.get(splitted[j]).y, j, i)
+
+                            gameStatus.game.enemies.get(splitted[j]).actionList.extend(sequence)
+
+
+
                         gameStatus.game.enemies.get(splitted[j]).x = j
                         gameStatus.game.enemies.get(splitted[j]).y = i
                     elif gameStatus.game.me.symbol == splitted[j]:
@@ -369,12 +424,10 @@ class Karen:
         players_analyzer = playersAnalyzer("playersAnalyzer")
         players_analyzer.start()
 
-
         game_analyzer = gameAnalyzer("gameAnalyzer", self.maxWeight)
         game_analyzer.start()
 
         if strategyType == "lowLevelStrategy":
-
             self.llStrategy()
 
         if strategyType == "fuzzyStrategy":
@@ -394,7 +447,7 @@ class Karen:
         while gameStatus.game.state != 'FINISHED' and gameStatus.game.me.state != "KILLED":
 
             nextActions = lowLevelStrategy(self.maxWeight, gameStatus.game.wantedFlagX, gameStatus.game.wantedFlagY)
-            self.chatSocket.sendInChat(gameStatus.game.name, "You are a bitch!!!")
+            # self.chatSocket.sendInChat(gameStatus.game.name, "You are a bitch!!!")
             for (action, direction) in nextActions:
                 if action == "move":
                     self.move(direction)
@@ -402,11 +455,11 @@ class Karen:
                     self.shoot(direction)
 
             # AGGIORNAMENTO
-            gameStatus.game.serverMap = self.lookAtMap(False)
+            self.lookStatus()
+            # gameStatus.game.serverMap = self.lookAtMap(False)
             gameStatus.game.weightedMap = deterministicMap(self.maxWeight)
 
             # self.lookStatus()
-
 
         if gameStatus.game.state != "FINISHED":
             print(gameStatus.game.me.name + " è morto.")
@@ -424,17 +477,17 @@ class Karen:
         :return:
         """
 
-
         while gameStatus.game.state != 'FINISHED' and gameStatus.game.me.state != "KILLED":
+            doIneedToCheckEnergy = False
+
             if gameStatus.game.emergencyMeeting == 1:
                 None
                 # check the game stage and if i'm an impostor or not
 
-            endx, endy, nearestEnemyDistance = FuzzyControlSystemStage0(self.maxWeight)
+            endx, endy = FuzzyControlSystemStage0(self.maxWeight)
             # Avoid useless LOOK if I can't die moving
 
-
-
+            nearestEnemyDistance = gameStatus.game.nearestEnemyLinearDistance[0]
             if int(nearestEnemyDistance // 2) > 2:
 
                 for i in range(1, int(nearestEnemyDistance // 2)):
@@ -481,9 +534,13 @@ class Karen:
                         self.move(direction)
                     if action == "shoot":
                         self.shoot(direction)
+                        doIneedToCheckEnergy = True
 
             # AGGIORNAMENTO
-            gameStatus.game.serverMap = self.lookAtMap(False)
+            if doIneedToCheckEnergy is True:
+                self.lookStatus()
+            else:
+                gameStatus.game.serverMap = self.lookAtMap(False)
             gameStatus.game.weightedMap = deterministicMap(self.maxWeight)
 
         if gameStatus.game.state != "FINISHED":

@@ -12,7 +12,7 @@ def creator(name, gameName):
     print(name)
     k = Karen(name, 'lowLevelStrategy')
     time.sleep(0.5)
-    if k.createGame(gameName, "BW2"):
+    if k.createGame(gameName, "BW1"):
         k.joinGame(gameName, "AI", "AI", "AI-02")
         while True:
             time.sleep(2)
