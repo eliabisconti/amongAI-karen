@@ -52,6 +52,15 @@ def chatAnalysis(vectorizer, model_misogyny):
 
                             break
 
+            if tmp[3] == 'shot':
+                # aggiungo 'spara' a lista azioni player
+                if gameStatus.game.allies.get(tmp[2]) is not None:
+                    gameStatus.game.allies.get(tmp[2]).actionList.append(0)    #(tmp[4], received_time))
+
+                elif gameStatus.game.enemies.get(tmp[2]) is not None:
+                    gameStatus.game.enemies.get(tmp[2]).actionList.append(0)   #(tmp[4], received_time))
+
+
             if tmp[3] == 'hit':
                 # 654324 @GameServer pinko2 hit pinko
                 # aggiungo pinko a lista killed di pinko2
