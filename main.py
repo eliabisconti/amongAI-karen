@@ -10,9 +10,9 @@ Nuovo main per creare karen multi processo e non multithreading
 
 def creator(name, gameName):
     print(name)
-    k = Karen(name, 'lowLevelStrategy')
+    k = Karen(name, 'fuzzyStrategy')
     time.sleep(0.5)
-    if k.createGame(gameName, "BW1"):
+    if k.createGame(gameName, "BW2"):
         k.joinGame(gameName, "AI", "AI", "AI-02")
         while True:
             time.sleep(2)
@@ -21,7 +21,7 @@ def creator(name, gameName):
 
 def gamer(name, gameName):
     print(name)
-    k = Karen(name, 'lowLevelStrategy')
+    k = Karen(name, 'fuzzyStrategy')
     k.joinGame(gameName, "AI", "AI", "AI-02")
     result = k.waitToStart()
 

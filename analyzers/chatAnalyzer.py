@@ -1,4 +1,5 @@
 import pickle
+import time
 from datetime import datetime
 from threading import Thread
 import re
@@ -128,6 +129,7 @@ class chatAnalyzer(Thread):
         t1 = dt1.time()
 
         while True:
+            time.sleep(0.1)
 
             # If something arrives in chat, analyze it
             if len(gameStatus.sharedList) > 0:

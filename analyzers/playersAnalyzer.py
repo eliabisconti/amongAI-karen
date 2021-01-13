@@ -29,7 +29,9 @@ def turingTest(t1):
                 diff = 2
             if diff > 3:
                 gameStatus.game.enemies.get(i).turingScore = 0
-                gameStatus.game.judgeList.append((name, 'H'))
+                if gameStatus.game.enemies.get(i).judgedAs is not "H":
+                    gameStatus.game.judgeList.append((name, 'H'))
+                    gameStatus.game.enemies.get(i).judgedAs = "H"
             else:
                 gameStatus.game.enemies.get(i).turingScore = 0.7
 
@@ -49,7 +51,10 @@ def turingTest(t1):
                 diff = 0
             if diff > 3:
                 gameStatus.game.allies.get(i).turingScore = 0
-                gameStatus.game.judgeList.append((name, 'H'))
+                if gameStatus.game.allies.get(i).judgedAs is not "H":
+                    gameStatus.game.judgeList.append((name, 'H'))
+                    gameStatus.game.allies.get(i).judgedAs = "H"
+
             else:
                 gameStatus.game.allies.playerList.get(i).turingScore = 0.7
 
@@ -60,13 +65,16 @@ def turingTest(t1):
         for i in gameStatus.game.enemies.keys():
             if gameStatus.game.enemies.get(i).turingScore != 0:
                 gameStatus.game.enemies.get(i).turingScore = 1
-                gameStatus.game.judgeList.append((i, 'AI'))
+                if gameStatus.game.enemies.get(i).judgedAs is not "AI":
+                    gameStatus.game.judgeList.append((i, 'AI'))
+                    gameStatus.game.enemies.get(i).judgedAs = "AI"
 
         for i in gameStatus.game.allies.keys():
             if gameStatus.game.allies.get(i).turingScore != 0:
                 gameStatus.game.allies.get(i).turingScore = 1
-                gameStatus.game.judgeList.append((i, 'AI'))
-
+                if gameStatus.game.allies.get(i).judgedAs is not "AI":
+                    gameStatus.game.judgeList.append((i, 'AI'))
+                    gameStatus.game.allies.get(i).judgedAs = "AI"
         # print('HO FINITO \n')
         # for i in gameStatus.db.playerList.keys():
         #   print('VALORE TURING: ' + str(gameStatus.db.playerList.get(i).turingScore) + '\n')
@@ -109,3 +117,4 @@ class playersAnalyzer(Thread):
             # From time to time update social deduction
             if True:
                 turingTest(t1)
+            time.sleep(0.2)

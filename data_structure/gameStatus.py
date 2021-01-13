@@ -13,10 +13,14 @@ class Player:
         self.y = None
 
         self.turingScore = 0.5
+
+        # if a player has been judged, set this parameter equal to "AI" or "H"
+        self.judgedAs = ""
         self.sdScore = 0
         self.kills = []
         self.messages = []
 
+        self.flagEuclideanDistance = 100
         self.offensivePlayer = False
         # list of all the action made by a player
         self.actionList = []
@@ -29,6 +33,7 @@ class Player:
         # 2 sniper,
         # 3 boh
         self.classificatedAs = None
+
 
 class Game:
     def __init__(self, gameName):
@@ -58,13 +63,19 @@ class Game:
         self.wantedFlagName = None
 
         self.wantedFlagMaxEuclideanDistance = None
-        self.wantedFlagEuclideanDistance =None
+        self.wantedFlagEuclideanDistance = None
 
         # map retrieved from the server
         self.serverMap = None
 
         # weighted deterministic map
         self.weightedMap = None
+
+        # weighted impostor deterministic map (create projecton for allies)
+        self.weightedImpostorMap = None
+
+        # distance and coordinate of a safezone around me
+        self.d_SafeZone = [100, self.mapWidth, self.mapWidth]
 
         # Nearest recharge (manhattan distance, coordinates)
         self.nearestRecharge = [11, None, None]
@@ -74,9 +85,9 @@ class Game:
         self.nearestEnemyLinearDistance = [11, None, None]
 
         # come sopra ma per gli alleati (utile per impostore)
-        self.nearestAlliesLinearDistance = [11, None, None]
+        self.nearestAllyLinearDistance = [11, None, None]
 
-        self.runners = 0
+        self.runner = [0, None, None]
 
         # Flag che segnala emergency meeting
         self.emergencyMeeting = 0
