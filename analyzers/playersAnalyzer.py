@@ -92,12 +92,7 @@ def socialDeduction():
                 if gameStatus.game.allies.get(i).sdScore > 0.8:
                     gameStatus.game.emergencyMeeting = 1
 
-    for i in gameStatus.game.enemies.keys():
-        for j in gameStatus.game.enemies.get(i).kills:
-            if gameStatus.game.enemies.get(j) is not None:
-                gameStatus.game.enemies.get(i).sdScore += 0.2
-                if gameStatus.game.enemies.get(i).sdScore > 0.8:
-                    gameStatus.game.emergencyMeeting = 1
+
 
 
 class playersAnalyzer(Thread):

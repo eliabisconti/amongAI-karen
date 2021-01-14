@@ -229,7 +229,7 @@ class gameAnalyzer(Thread):
                         count_2 = 0
                         max_count = 0
                         max_i = None
-                        for x in tmp_act:
+                        for x in tmp_act[-25:]:
                             if x == 0:
                                 count_0 += 1
                                 if count_0 > max_count:
@@ -261,7 +261,7 @@ class gameAnalyzer(Thread):
 
                 if len(nearFlagRunnerList) > 0:
                     fireLineX, fireLineY = findFireLineCoordinateForKilling(nearFlagRunnerList)
-                    print("ATTENZIONE! Il nemico è piu vicino alla bandiera di me, dovrei andare ad ucciderlo.")
+                    #print("ATTENZIONE! Il nemico è piu vicino alla bandiera di me, dovrei andare ad ucciderlo.")
                     gameStatus.game.runner = [2, fireLineX, fireLineY]
 
                 elif len(otherRunnerList) > 0:

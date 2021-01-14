@@ -509,8 +509,14 @@ class Karen:
 
                     # se c'è un emergency meeting e sto safe, posso accusare
                     if gameStatus.game.emergencyMeeting == 1:
-                        None
-                        # todo: Aggiungere codice per accusare quello con valore più alto
+                        playerToAccuse = [None, 0]
+                        for k in gameStatus.game.allies.keys():
+                            if gameStatus.game.allies.get(k).sdScore > playerToAccuse[1]:
+                                playerToAccuse = [gameStatus.game.allies.get(k).name, gameStatus.game.allies.get(k).sdScore]
+                        if playerToAccuse[1] > 0.5:
+                            self.accuse(playerToAccuse[0])
+                        gameStatus.game.emergencyMeeting = 0
+
 
                     # se c'è qualcosa da votare vota uno else muoviti
                     elif len(gameStatus.game.judgeList) > 0:
@@ -585,7 +591,7 @@ class Karen:
                 print("EXCEPTION IN FUZZY: X is " + str(endx) + "and Y is " + str(endy))
                 if gameStatus.game.wantedFlagEuclideanDistance > gameStatus.game.wantedFlagMaxEuclideanDistance/ 4:
                     endx = gameStatus.game.toBeDefendedFlagX
-                    endy = gameStatus.game.toù
+                    endy = gameStatus.game.toBeDefendedFlagY
                 # todo: impostore cosa fa se fuzzy mi da coordinate non valide?
                 else:
                     endx = gameStatus.game.wantedFlagX
@@ -610,8 +616,14 @@ class Karen:
 
                     # se c'è un emergency meeting e sto safe, posso accusare
                     if gameStatus.game.emergencyMeeting == 1:
-                        None
-                        # todo: Aggiungere codice per accusare quello con valore più alto
+                        playerToAccuse = [None, 0]
+                        for k in gameStatus.game.allies.keys():
+                            if gameStatus.game.allies.get(k).sdScore > playerToAccuse[1]:
+                                playerToAccuse = [gameStatus.game.allies.get(k).name,
+                                                  gameStatus.game.allies.get(k).sdScore]
+                        if playerToAccuse[1] > 0.5:
+                            self.accuse(playerToAccuse[0])
+                        gameStatus.game.emergencyMeeting = 0
 
                     # se c'è qualcosa da votare vota uno else muoviti
                     elif len(gameStatus.game.judgeList) > 0:
