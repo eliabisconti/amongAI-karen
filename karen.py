@@ -592,7 +592,6 @@ class Karen:
                 if gameStatus.game.wantedFlagEuclideanDistance > gameStatus.game.wantedFlagMaxEuclideanDistance/ 4:
                     endx = gameStatus.game.toBeDefendedFlagX
                     endy = gameStatus.game.toBeDefendedFlagY
-                # todo: impostore cosa fa se fuzzy mi da coordinate non valide?
                 else:
                     endx = gameStatus.game.wantedFlagX
                     endy = gameStatus.game.wantedFlagY

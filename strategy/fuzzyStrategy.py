@@ -24,10 +24,7 @@ def fuzzyValues(maxWeight):
     runner = gameStatus.game.runner[0]
     '''Useful values for impostor strategy'''
 
-    if len(gameStatus.game.allies) == 0:
-        alive_allies = 0
-    else:
-        alive_allies = gameStatus.game.activeAllies / len(gameStatus.game.allies)  # alive/total ratio
+    alive_allies = gameStatus.game.activeAllies  # alive
 
     close_to_ally = gameStatus.game.nearestAllyLinearDistance[0]  # quanto sono vicino alla linea di fuoco dell'alleato
 
@@ -132,7 +129,7 @@ def FuzzyControlSystem(maxWeight):
     # d_flag, nearestRecharge, myenergy, d_SafeZone, close_to_enemy, alive_allies, stage, close_to_ally
 
     flag, rech, energy, safeZone, enemy, allies, stage, ally, runner = fuzzyValues(maxWeight)
-    while flag is None:
+    while flag is None or rech is None or energy is None or safeZone is None or enemy is None or allies is None or stage is None or runner is None:
         time.sleep(0.05)
         flag, rech, energy, safeZone, enemy, allies, stage, ally, runner = fuzzyValues(maxWeight)
 
@@ -143,25 +140,25 @@ def FuzzyControlSystem(maxWeight):
     sim.input['stage'] = stage
     sim.input['runner'] = runner
 
-    sim.compute()
-    outputValue = sim.output.get("output")
+    #sim.compute()
+    #outputValue = sim.output.get("output")
 
     # output.view(sim=sim)  # plot
 
-    '''Gestione eccezioni RIMOSSA'''
-    '''
+    '''Gestione eccezioni '''
+
     try:
         sim.compute()
         outputValue = sim.output.get("output")
 
-        output.view(sim=sim)  # plot
+        #output.view(sim=sim)  # plot
 
     except:
         # crisp case: staySafe
-        print("EXCEPTION FUZZY")
+        #print("EXCEPTION FUZZY")
 
-        outputValue = 35
-    '''
+        outputValue = 25
+
 
     '''Outcomes'''
 
@@ -212,7 +209,7 @@ def FuzzyControlSystemImpostor(maxWeight):
     myenergy = ctrl.Antecedent(np.arange(0, 256, 1), 'myenergy')
     nearestRecharge = ctrl.Antecedent(np.arange(0, 11, 1), 'nearestRecharge')
     stage = ctrl.Antecedent(np.arange(0, 2, 1), 'stage')
-    alive_allies = ctrl.Antecedent(np.arange(0, 1, 0.01), 'alive_allies')
+    alive_allies = ctrl.Antecedent(np.arange(0, len(gameStatus.game.allies), 1), 'alive_allies')
 
     # se il rapporto è uno, gli allies sono tutti vivi
     # se è zero, gli allies sono tutti morti
@@ -287,7 +284,7 @@ def FuzzyControlSystemImpostor(maxWeight):
 
     # d_flag, nearestRecharge, myenergy, d_SafeZone, close_to_enemy, alive_allies, stage, close_to_ally
     flag, rech, energy, safeZone, enemy, allies, stage, ally, runner = fuzzyValues(maxWeight)
-    while flag is None:
+    while flag is None or rech is None or energy is None or safeZone is None or enemy is None or allies is None or stage is None or runner is None:
         time.sleep(0.05)
         flag, rech, energy, safeZone, enemy, allies, stage, ally, runner = fuzzyValues(maxWeight)
 
@@ -303,18 +300,19 @@ def FuzzyControlSystemImpostor(maxWeight):
     outputValue = sim.output.get("output")
     # output.view(sim=sim) # plot
 
-    ''' Gestione eccezioni RIMOSSA'''
-    '''
+    ''' Gestione eccezioni '''
+
     try:
         sim.compute()
         outputValue = sim.output.get("output")
-        output.view(sim=sim)
+        #output.view(sim=sim)
 
     except:
         # crisp case, stay safe
-        print("EXCEPTION FUZZY")
-        outputValue = 15
-    '''
+        # print("EXCEPTION FUZZY")
+        return None, None
+        # outputValue = 15
+
 
     '''Outcomes'''
 
