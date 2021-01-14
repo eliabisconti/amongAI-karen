@@ -69,6 +69,9 @@ if __name__ == '__main__':
             print("2 = huge map")
             parameters = "BQ1"
             parameters = input("Insert the parameters (default BQ1): ")
+            if parameters == "":
+                parameters = "BQ1"
+
             roomname = str(randint(300000, 9000000))
             p = (Process(target=creator, args=('KarenA', roomname, parameters)))
             p.start()
