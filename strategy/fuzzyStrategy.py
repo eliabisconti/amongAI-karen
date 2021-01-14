@@ -296,9 +296,7 @@ def FuzzyControlSystemImpostor(maxWeight):
     sim.input['alive_allies'] = allies
     sim.input['close_to_ally'] = ally
 
-    sim.compute()
-    outputValue = sim.output.get("output")
-    # output.view(sim=sim) # plot
+
 
     ''' Gestione eccezioni '''
 

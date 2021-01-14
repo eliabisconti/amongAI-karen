@@ -8,10 +8,10 @@ Nuovo main per creare karen multi processo e non multithreading
 """
 
 
-def creator(name, gameName):
+def creator(name, gameName, parameters):
     k = Karen(name, 'fuzzyStrategy')
 
-    if k.createGame(gameName, "BW2"):
+    if k.createGame(gameName, parameters):
         k.joinGame(gameName, "AI", "AI", "AI-02")
         while True:
             time.sleep(2)
@@ -62,8 +62,15 @@ if __name__ == '__main__':
     elif int(response) == 2:
         number = input("How many karen do you want? ")
         if number.isdigit() and int(number) > 1:
+            print("\nB = balanced team (optional parameter)")
+            print("Q = squared map, W = wide map")
+            print("0 = small map")
+            print("1 = average map")
+            print("2 = huge map")
+            parameters = "BQ1"
+            parameters = input("Insert the parameters (default BQ1): ")
             roomname = str(randint(300000, 9000000))
-            p = (Process(target=creator, args=('KarenA', roomname)))
+            p = (Process(target=creator, args=('KarenA', roomname, parameters)))
             p.start()
             process.append(p)
             for i in range(0, int(number)-1):

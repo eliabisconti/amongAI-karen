@@ -63,7 +63,6 @@ class Karen:
         :param gameName: uniquely identifies the gameStatus.game.
         :return: True if created, False ow.
         """
-        print('Creo game')
         # A Karen can play one game at a time. Game encapsulate all the information about the map and other players
         if flags is not None:
             response = self.serverSocket.send("NEW " + gameName + " " + flags)
@@ -487,7 +486,7 @@ class Karen:
             # Avoid useless LOOK if I can't die moving
 
             if endx is None or endy is None or endx < 0 or endy < 0 or endx > gameStatus.game.mapWidth or endy > gameStatus.game.mapHeight:
-                print("EXCEPTION IN FUZZY: X is " + str(endx) + "and Y is " + str(endy))
+                #print("EXCEPTION IN FUZZY: X is " + str(endx) + "and Y is " + str(endy))
                 endx = gameStatus.game.wantedFlagX
                 endy = gameStatus.game.wantedFlagY
 
@@ -523,7 +522,7 @@ class Karen:
                         obj = gameStatus.game.judgeList.pop()
                         obj_name = obj[0]
                         obj_nature = obj[1]
-                        print(str(gameStatus.game.me.name) + 'giudica : ' + obj_name + ' ' + obj_nature + '\n')
+                        # print(str(gameStatus.game.me.name) + 'giudica : ' + obj_name + ' ' + obj_nature + '\n')
                         self.judge(obj_name, obj_nature)
 
                     else:
@@ -568,9 +567,10 @@ class Karen:
                 obj = gameStatus.game.judgeList.pop()
                 obj_name = obj[0]
                 obj_nature = obj[1]
-                print('DA MANDARE: ' + obj_name + ' ' + obj_nature + '\n')
+                #print('DA MANDARE: ' + obj_name + ' ' + obj_nature + '\n')
                 self.judge(obj_name, obj_nature)
 
+        print("ritorno")
         return True
 
     def fStrategyImpostor(self):
@@ -629,7 +629,7 @@ class Karen:
                         obj = gameStatus.game.judgeList.pop()
                         obj_name = obj[0]
                         obj_nature = obj[1]
-                        print(str(gameStatus.game.me.name) + 'giudica : ' + obj_name + ' ' + obj_nature + '\n')
+                        #print(str(gameStatus.game.me.name) + 'giudica : ' + obj_name + ' ' + obj_nature + '\n')
                         self.judge(obj_name, obj_nature)
 
                     else:
@@ -682,7 +682,8 @@ class Karen:
                 obj = gameStatus.game.judgeList.pop()
                 obj_name = obj[0]
                 obj_nature = obj[1]
-                print('DA MANDARE: ' + obj_name + ' ' + obj_nature + '\n')
+                # print('DA MANDARE: ' + obj_name + ' ' + obj_nature + '\n')
                 self.judge(obj_name, obj_nature)
 
+        print("ritorno ")
         return True
