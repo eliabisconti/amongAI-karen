@@ -123,7 +123,7 @@ class playersAnalyzer(Thread):
             '''
             Riga incriminata v
             '''
-            if (dt1 + timedelta(minutes=1)) < datetime.now():
+            if (dt1 + timedelta(minutes=1)) < datetime.now() or gameStatus.game.emergencyMeeting == 1:
 
                 socialDeduction()
                 dt1 = datetime.now()
