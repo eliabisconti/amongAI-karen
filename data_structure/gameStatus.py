@@ -1,3 +1,8 @@
+"""
+Class that contains all the player's info
+"""
+
+
 class Player:
 
     def __init__(self, name):
@@ -16,12 +21,16 @@ class Player:
 
         # if a player has been judged, set this parameter equal to "AI" or "H"
         self.judgedAs = ""
+        # [0.0, ... ,1.0]
         self.sdScore = 0
+
         self.kills = []
         self.messages = []
 
         self.flagEuclideanDistance = 100
+
         self.offensivePlayer = False
+
         # list of all the action made by a player
         self.actionList = []
 
@@ -30,9 +39,15 @@ class Player:
 
         # is this player a runner, a sniper or what? TBD
         # 1 runner,
-        # 2 sniper,
+        # 2 defender,
         # 3 boh
+
         self.classificatedAs = None
+
+
+"""
+Class that contains all the game's information
+"""
 
 
 class Game:
@@ -44,17 +59,21 @@ class Game:
         self.stage = 0
         self.me = None
 
+        # list of allies player
         self.allies = dict()
+
+        # list of enemies player
         self.enemies = dict()
+
 
         self.activeEnemies = None
         self.activeAllies = None
 
-        # Map dimension, height and width
+        # map dimension, height and width
         self.mapHeight = None
         self.mapWidth = None
 
-        # Flags coordinates, name and euclidean distance
+        # flags coordinates, name and euclidean distance
         self.toBeDefendedFlagX = None
         self.toBeDefendedFlagY = None
         self.toBeDefendedFlagName = None
@@ -77,7 +96,7 @@ class Game:
         # distance and coordinate of a safezone around me
         self.d_SafeZone = [100, self.mapWidth, self.mapWidth]
 
-        # Nearest recharge (manhattan distance, coordinates)
+        # nearest recharge (manhattan distance, coordinates)
         self.nearestRecharge = [11, None, None]
 
         # number of actions (manhattan distance) that can be done safely and the coordinates to the nearest enemy fireline
@@ -89,7 +108,7 @@ class Game:
 
         self.runner = [0, None, None]
 
-        # Flag che segnala emergency meeting
+        # flag che segnala emergency meeting
         self.emergencyMeeting = 0
 
         self.judgeList = []

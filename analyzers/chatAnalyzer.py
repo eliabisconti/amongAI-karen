@@ -12,6 +12,12 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 def chatAnalysis(vectorizer, model_misogyny):
+    """
+    Analyze every chat's message to update information about the game and all the players' actions
+    Also analyze every message from other player to determine if it contains offensive language or not
+    :param vectorizer: tfidf_vectorizer
+    :param model_misogyny: prediction model
+    """
     received = gameStatus.sharedList.pop()  # è coppia stringa timestamp
     received_str = received[0]
     received_time = received[1]

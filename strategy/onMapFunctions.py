@@ -3,14 +3,13 @@ from scipy.spatial import distance
 from data_structure import gameStatus
 from data_structure.gameStatus import *
 
+"""
+Discourage Karen to allign with enemies. If there is no other way, go and shoot.
+"""
+
 
 def deterministicMap(maxWeight):
-    """
-     CELLULAR AUTOMATA MAP. Discourage Karen to allign with enemies. If there is no other way, go and shoot.
-     :param me: my info as AI
-     :param maxWeight: the max weight value in the map
-     :return: a weighted map
-     """
+
     value = [int(maxWeight / 2), int(maxWeight / 4)]
     walkable = ["."]
     river = ["~"]
@@ -81,10 +80,10 @@ def deterministicMap(maxWeight):
             if enemy.y - 1 >= 0:
                 if enemy.x - 1 >= 0:
                     weightedMap = recursiveMap(enemy.y - 1, enemy.x - 1, weightedMap, int(maxWeight / 4))
-                if enemy.x + 1 < len(weightedMap[0]):
+                if enemy.x + 1 < gameStatus.game.mapWidth:
                     weightedMap = recursiveMap(enemy.y - 1, enemy.x + 1, weightedMap, int(maxWeight / 4))
 
-            if enemy.y + 1 < len(weightedMap[0]):
+            if enemy.y + 1 < gameStatus.game.mapHeight:
                 if enemy.x - 1 >= 0:
                     weightedMap = recursiveMap(enemy.y + 1, enemy.x - 1, weightedMap, int(maxWeight / 4))
                 if enemy.x + 1 < len(weightedMap[0]):
@@ -128,14 +127,13 @@ def deterministicMap(maxWeight):
     return weightedMap
 
 
-# same as deterministic map. here the map is computed considering allies as enemies and viceversa
+"""
+Same as deterministic map. here the map is computed considering allies as enemies and viceversa
+"""
+
+
 def deterministicImpostorMap(maxWeight):
-    """
-     CELLULAR AUTOMATA MAP. Discourage Karen to allign with enemies. If there is no other way, go and shoot.
-     :param me: my info as AI
-     :param maxWeight: the max weight value in the map
-     :return: a weighted map
-     """
+
     value = [int(maxWeight / 2), int(maxWeight / 4)]
     walkable = ["."]
     river = ["~"]
@@ -206,10 +204,10 @@ def deterministicImpostorMap(maxWeight):
             if enemy.y - 1 >= 0:
                 if enemy.x - 1 >= 0:
                     weightedMap = recursiveMap(enemy.y - 1, enemy.x - 1, weightedMap, int(maxWeight / 4))
-                if enemy.x + 1 < len(weightedMap[0]):
+                if enemy.x + 1 < gameStatus.game.mapWidth:
                     weightedMap = recursiveMap(enemy.y - 1, enemy.x + 1, weightedMap, int(maxWeight / 4))
 
-            if enemy.y + 1 < len(weightedMap[0]):
+            if enemy.y + 1 < gameStatus.game.mapHeight:
                 if enemy.x - 1 >= 0:
                     weightedMap = recursiveMap(enemy.y + 1, enemy.x - 1, weightedMap, int(maxWeight / 4))
                 if enemy.x + 1 < len(weightedMap[0]):
@@ -253,15 +251,13 @@ def deterministicImpostorMap(maxWeight):
     return weightedMap
 
 
+"""
+Given a list of players, find the coordinates needed to go to kill them
+"""
+
+
 def findFireLineCoordinateForKilling(playerList):
-    maxWeight = 32
-    """
-     CELLULAR AUTOMATA MAP. Discourage Karen to allign with enemies. If there is no other way, go and shoot.
-     :param me: my info as AI
-     :param maxWeight: the max weight value in the map
-     :return: a weighted map
-     """
-    value = [int(maxWeight / 2), int(maxWeight / 4)]
+
     walkable = ["."]
     river = ["~"]
     trap = ["!"]
@@ -272,6 +268,8 @@ def findFireLineCoordinateForKilling(playerList):
     enemies = playerList
     serverMap = gameStatus.game.serverMap
     weightedMap = [row[:] for row in serverMap]
+    maxWeight = 32
+    value = [int(maxWeight / 2), int(maxWeight / 4)]
 
     def recursiveMap(count, j, rec_weightedMap, weight):
         """
@@ -374,6 +372,10 @@ def findFireLineCoordinateForKilling(playerList):
 
     return coordinateForKilling[1], coordinateForKilling[2]
 
+
+"""
+Make inference to determine player's movement
+"""
 
 
 def whereItMoved(prevX, prevY, newX, newY):

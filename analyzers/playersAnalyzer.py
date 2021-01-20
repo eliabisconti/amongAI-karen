@@ -1,4 +1,6 @@
 from datetime import datetime
+from datetime import timedelta
+
 from threading import Thread
 from data_structure import gameStatus
 import time
@@ -7,8 +9,11 @@ from strategy.pathFinder import findPath
 
 
 def turingTest(t1):
+    """
+    Check the speed of each player movement. Humans can move faster than AI
+    """
     datetimeFormat = '%H:%M:%S.%f'
-    # Cheating
+
     positions_enemies_before = gameStatus.game.enemies
     positions_allies_before = gameStatus.game.allies
     time.sleep(1)  # AI possono fare al massimo 3 passi
@@ -86,9 +91,19 @@ def turingTest(t1):
 def socialDeduction():
     # controlla che abbia ucciso compagni di squadra
     for i in gameStatus.game.allies.keys():
+        gameStatus.game.allies.get(i).sdScore = 0
         for j in gameStatus.game.allies.get(i).kills:
+
             if gameStatus.game.allies.get(j) is not None:
-                gameStatus.game.allies.get(i).sdScore += 0.2
+                # se sto in stage 2 controllo pure che il player sia lontano dalla flag per assegnare peso maggiore
+                if gameStatus.game.stage == 2:
+                    if gameStatus.game.allies.get(i).flagEuclideanDistance > gameStatus.game.wantedFlagMaxEuclideanDistance/2:
+                        gameStatus.game.allies.get(i).sdScore += 0.4
+
+                else:
+                    gameStatus.game.allies.get(i).sdScore += 0.2
+
+
                 if gameStatus.game.allies.get(i).sdScore > 0.8:
                     gameStatus.game.emergencyMeeting = 1
 
@@ -103,12 +118,16 @@ class playersAnalyzer(Thread):
     def run(self):
         dt1 = datetime.now()
         t1 = dt1.time()
-        while True:
-
+        while gameStatus.game.state != "FINISHED":
             # From time to time update social deduction
-            if True:
-                socialDeduction()
+            '''
+            Riga incriminata v
+            '''
+            if (dt1 + timedelta(minutes=1)) < datetime.now():
 
+                socialDeduction()
+                dt1 = datetime.now()
+                t1 = dt1.time()
             # From time to time update social deduction
             if True:
                 turingTest(t1)

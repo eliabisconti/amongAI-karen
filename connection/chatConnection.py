@@ -30,7 +30,7 @@ class ReceiveThread(Thread):
             received = received.decode('utf-8')
             if received == '':
                 break
-            print('Sono ' + self.plname + ', Ricevuto: ' + received)
+            # print('Sono ' + self.plname + ', Ricevuto: ' + received)
             pair = (received, timeObj)
             gameStatus.sharedList.append(pair)
 

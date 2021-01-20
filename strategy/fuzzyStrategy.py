@@ -140,8 +140,7 @@ def FuzzyControlSystem(maxWeight):
     sim.input['stage'] = stage
     sim.input['runner'] = runner
 
-    #sim.compute()
-    #outputValue = sim.output.get("output")
+
 
     # output.view(sim=sim)  # plot
 
@@ -167,33 +166,33 @@ def FuzzyControlSystem(maxWeight):
         x = gameStatus.game.nearestEnemyLinearDistance[1]
         y = gameStatus.game.nearestEnemyLinearDistance[2]
 
-        #print(gameStatus.game.me.name + " vado ad uccidere: ")
+        print(gameStatus.game.me.name + " vado ad uccidere: ")
 
     elif int(outputValue) in range(10, 20):  # kill the runner
         x = gameStatus.game.runner[1]
         y = gameStatus.game.runner[2]
 
-        #print(gameStatus.game.me.name + " vado ad uccidere il runner")
+        print(gameStatus.game.me.name + " vado ad uccidere il runner")
 
     elif int(outputValue) in range(20, 30):  # flag
 
         x = gameStatus.game.wantedFlagX
         y = gameStatus.game.wantedFlagY
 
-        #print(gameStatus.game.me.name + " vado alla bandiera ")
+        print(gameStatus.game.me.name + " vado alla bandiera ")
 
 
     elif int(outputValue) in range(30, 40):  # safe
         x = safeZone[1]
         y = safeZone[2]
 
-        #print(gameStatus.game.me.name + " vado in safe zone")
+        print(gameStatus.game.me.name + " vado in safe zone")
 
     else:  # 40-50 recharge
         x = gameStatus.game.nearestRecharge[1]
         y = gameStatus.game.nearestRecharge[2]
 
-        #print(gameStatus.game.me.name + " vado a ricaricarmi, energia:  " + str(int(energy)))
+        print(gameStatus.game.me.name + " vado a ricaricarmi, energia:  " + str(int(energy)))
 
     return x, y
 
@@ -319,25 +318,25 @@ def FuzzyControlSystemImpostor(maxWeight):
         x = gameStatus.game.nearestAllyLinearDistance[1]
         y = gameStatus.game.nearestAllyLinearDistance[2]
 
-        #print(gameStatus.game.me.name + "IMPOSTOR vado ad uccidere")
+        print(gameStatus.game.me.name + "IMPOSTOR vado ad uccidere")
 
     elif outputValue in range(10, 20):  # recharge
 
         x = gameStatus.game.nearestRecharge[1]
         y = gameStatus.game.nearestRecharge[2]
 
-        #print(gameStatus.game.me.name + "IMPOSTOR vado a ricaricarmi")
+        print(gameStatus.game.me.name + "IMPOSTOR vado a ricaricarmi")
 
     elif outputValue in range(30, 40):  # flag
         x = gameStatus.game.wantedFlagX
         y = gameStatus.game.wantedFlagY
 
-        #print(gameStatus.game.me.name + "IMPOSTOR vado alla bandiera")
+        print(gameStatus.game.me.name + "IMPOSTOR vado alla bandiera")
     else:  # safe
 
         x = safeZone[1]
         y = safeZone[2]
 
-        #print(gameStatus.game.me.name + "IMPOSTOR vado in safe zone")
+        print(gameStatus.game.me.name + "IMPOSTOR vado in safe zone")
 
     return x, y

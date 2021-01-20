@@ -33,7 +33,7 @@ def gamer(name, gameName):
 
 def gamerRegistration(name, tournamentName):
     k = Karen(name, 'fuzzyStrategy')
-    k.chatSocket.sendInChat("tournamentName", "JOIN")
+    k.chatSocket.sendInChat(tournamentName, "JOIN")
     return
 
 

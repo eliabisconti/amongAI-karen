@@ -456,8 +456,7 @@ class Karen:
                     self.shoot(direction)
 
             # AGGIORNAMENTO
-            self.lookStatus()
-            # gameStatus.game.serverMap = self.lookAtMap(False)
+            gameStatus.game.serverMap = self.lookAtMap(False)
             gameStatus.game.weightedMap = deterministicMap(self.maxWeight)
 
             # self.lookStatus()
@@ -474,8 +473,6 @@ class Karen:
 
         """
         Call the fuzzyStrategy. Uses fuzzy rule to take the best decision.
-        This function will check if you are an impostor or not and check in which is the game's stage
-        :return:
         """
 
         while gameStatus.game.state != 'FINISHED' and gameStatus.game.me.state != "KILLED":
@@ -486,12 +483,11 @@ class Karen:
             # Avoid useless LOOK if I can't die moving
 
             if endx is None or endy is None or endx < 0 or endy < 0 or endx > gameStatus.game.mapWidth or endy > gameStatus.game.mapHeight:
-                #print("EXCEPTION IN FUZZY: X is " + str(endx) + "and Y is " + str(endy))
                 endx = gameStatus.game.wantedFlagX
                 endy = gameStatus.game.wantedFlagY
 
             nearestEnemyDistance = gameStatus.game.nearestEnemyLinearDistance[0]
-            if int(nearestEnemyDistance // 2) > 2:
+            if nearestEnemyDistance is not None and int(nearestEnemyDistance // 2) > 2:
 
                 numberOfSafeMovement = int(nearestEnemyDistance//2)
                 '''
@@ -540,7 +536,7 @@ class Karen:
 
             else:
 
-                #print("LOW LEVEL")
+                # print("LOW LEVEL")
 
                 nextActions = lowLevelStrategy(self.maxWeight, endx, endy)
 
@@ -556,28 +552,27 @@ class Karen:
                 self.lookStatus()
             else:
                 gameStatus.game.serverMap = self.lookAtMap(False)
+
             gameStatus.game.weightedMap = deterministicMap(self.maxWeight)
+
 
         if gameStatus.game.state != "FINISHED":
             print(gameStatus.game.me.name + " è morto.")
 
         while gameStatus.game.state == "ACTIVE":
             self.lookStatus()
+            # se sono morto e il gioco è attivo posso ancora votare
             if len(gameStatus.game.judgeList) > 0:
-                obj = gameStatus.game.judgeList.pop()
-                obj_name = obj[0]
-                obj_nature = obj[1]
-                #print('DA MANDARE: ' + obj_name + ' ' + obj_nature + '\n')
-                self.judge(obj_name, obj_nature)
+                pl = gameStatus.game.judgeList.pop()
+                pl_name = pl[0]
+                pl_nature = pl[1]
+                self.judge(pl_name, pl_nature)
 
-        print("ritorno")
         return True
 
     def fStrategyImpostor(self):
         """
-        Call the fuzzyStrategy. Uses fuzzy rule to take the best decision.
-        This function will check if you are an impostor or not and check in which is the game's stage
-        :return:
+        Call the fuzzyStrategy related to the impostor. Uses fuzzy rule to take the best decision.
         """
         gameStatus.game.weightedImpostorMap = deterministicImpostorMap(self.maxWeight)
 
@@ -588,8 +583,7 @@ class Karen:
             # Avoid useless LOOK if I can't die moving
 
             if endx is None or endy is None or endx < 0 or endy < 0 or endx > gameStatus.game.mapWidth or endy > gameStatus.game.mapHeight:
-                print("EXCEPTION IN FUZZY: X is " + str(endx) + "and Y is " + str(endy))
-                if gameStatus.game.wantedFlagEuclideanDistance > gameStatus.game.wantedFlagMaxEuclideanDistance/ 4:
+                if gameStatus.game.wantedFlagEuclideanDistance > gameStatus.game.wantedFlagMaxEuclideanDistance / 4:
                     endx = gameStatus.game.toBeDefendedFlagX
                     endy = gameStatus.game.toBeDefendedFlagY
                 else:
@@ -626,11 +620,10 @@ class Karen:
 
                     # se c'è qualcosa da votare vota uno else muoviti
                     elif len(gameStatus.game.judgeList) > 0:
-                        obj = gameStatus.game.judgeList.pop()
-                        obj_name = obj[0]
-                        obj_nature = obj[1]
-                        #print(str(gameStatus.game.me.name) + 'giudica : ' + obj_name + ' ' + obj_nature + '\n')
-                        self.judge(obj_name, obj_nature)
+                        pl = gameStatus.game.judgeList.pop()
+                        pl_name = pl[0]
+                        pl_nature = pl[1]
+                        self.judge(pl_name, pl_nature)
 
                     else:
                         try:
@@ -667,11 +660,6 @@ class Karen:
             gameStatus.game.weightedMap = deterministicMap(self.maxWeight)
             gameStatus.game.weightedImpostorMap = deterministicImpostorMap(self.maxWeight)
 
-            #for k in gameStatus.game.serverMap:
-            #    print(k)
-
-            #for k in gameStatus.game.weightedImpostorMap:
-            #    print(k)
 
         if gameStatus.game.state != "FINISHED":
             print(gameStatus.game.me.name + " è morto.")
@@ -679,11 +667,9 @@ class Karen:
         while gameStatus.game.state == "ACTIVE":
             self.lookStatus()
             if len(gameStatus.game.judgeList) > 0:
-                obj = gameStatus.game.judgeList.pop()
-                obj_name = obj[0]
-                obj_nature = obj[1]
-                # print('DA MANDARE: ' + obj_name + ' ' + obj_nature + '\n')
-                self.judge(obj_name, obj_nature)
+                pl = gameStatus.game.judgeList.pop()
+                pl_name = pl[0]
+                pl_nature = pl[1]
+                self.judge(pl_name, pl_nature)
 
-        print("ritorno ")
         return True
